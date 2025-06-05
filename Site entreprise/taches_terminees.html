@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tâches Terminées</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-6">
+    <div id="finished-tasks-root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const CheckCircle = ({ className }) => <svg className={`h-4 w-4 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>;
+        const Trash2 = ({ className }) => <svg className={`h-4 w-4 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 2 0 00-1 1v3M4 7h16"></path></svg>;
+
+        const FinishedTasks = () => {
+            const [finishedTasks, setFinishedTasks] = useState([]);
+
+            useEffect(() => {
+                if (typeof window !== 'undefined') {
+                    try {
+                        const savedFinishedTasks = localStorage.getItem('finishedTasks');
+                        setFinishedTasks(savedFinishedTasks ? JSON.parse(savedFinishedTasks) : []);
+                    } catch (error) {
+                        console.error("Erreur de parsing des tâches terminées depuis le localStorage", error);
+                    }
+                }
+            }, []);
+
+            const handleDeleteFinishedTask = (taskId) => {
+                setFinishedTasks(prevTasks => {
+                    const updatedTasks = prevTasks.filter(task => task.id !== taskId);
+                    localStorage.setItem('finishedTasks', JSON.stringify(updatedTasks));
+                    return updatedTasks;
+                });
+            };
+
+            return (
+                <div className="container mx-auto">
+                    <h1 className="text-3xl font-bold mb-8 text-white">Tâches Terminées</h1>
+                    {finishedTasks.length === 0 ? (
+                        <p className="text-gray-400">Aucune tâche terminée pour le moment.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {finishedTasks.map(task => (
+                                <div key={task.id} className="bg-gray-800 rounded-lg p-4 shadow-md flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-white">{task.title}</h3>
+                                        <p className="text-gray-300 text-sm mt-1">{task.description}</p>
+                                        {task.dueDate && (
+                                            <small className="block text-gray-400 text-xs mt-2">
+                                                Terminée le : {new Date().toLocaleDateString('fr-FR')}
+                                            </small>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteFinishedTask(task.id)}
+                                        className="text-red-400 hover:text-red-300 ml-4 p-2 rounded-full hover:bg-gray-700 transition-colors"
+                                    >
+                                        <Trash2 className="h-5 w-5" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <button
+                        onClick={() => window.close()}
+                        className="mt-8 px-4 py-2 bg-gray-700 hover:bg-gray-600/50 text-white rounded-md transition-colors"
+                    >
+                        Fermer
+                    </button>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<FinishedTasks />, document.getElementById('finished-tasks-root'));
+    </script>
+</body>
+</html>

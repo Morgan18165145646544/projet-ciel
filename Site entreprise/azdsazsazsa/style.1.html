@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Tâches</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+</head>
+<body class="min-h-screen bg-[#1a1a2e] text-gray-200 font-inter flex items-center justify-center p-4">
+    <div class="container flex flex-col md:flex-row w-full max-w-7xl h-[90vh] min-h-[600px] bg-[#111122] rounded-xl shadow-2xl overflow-hidden">
+        <aside class="sidebar w-full md:w-64 bg-[#20203f] p-6 flex flex-col border-b md:border-b-0 md:border-r border-[#333355]">
+            <h2 class="text-white text-2xl font-semibold mb-8 pl-2">Emplois</h2>
+            <ul class="menu-list flex-grow space-y-2">
+                <li class="flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-300 bg-[#3b3b6b] text-white font-medium">
+                    <i class="fas fa-list-ul mr-4 text-[#8aff8a] text-lg"></i>
+                    <span>Tâche à faire</span>
+                </li>
+                <li class="flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-[#28284f]">
+                    <i class="fas fa-code mr-4 text-gray-400 text-lg"></i>
+                    <span>Développeur Java Senior</span>
+                </li>
+                <li class="flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-[#28284f]">
+                    <i class="fas fa-pen-nib mr-4 text-gray-400 text-lg"></i>
+                    <span>Graphiste</span>
+                </li>
+                <li class="flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-[#28284f]">
+                    <i class="fas fa-user-tie mr-4 text-gray-400 text-lg"></i>
+                    <span>Gestionnaire de compte</span>
+                </li>
+            </ul>
+            <button class="completed-tasks-button bg-[#4CAF50] text-white py-3 px-5 rounded-lg text-base font-semibold flex items-center justify-center mt-6 transition-colors duration-300 hover:bg-[#45a049]">
+                <i class="fas fa-check-circle mr-3 text-xl"></i>
+                <span>Tâches Terminées</span>
+            </button>
+        </aside>
+
+        <main class="main-content flex-grow p-6 flex flex-col overflow-hidden">
+            <div class="header flex flex-col sm:flex-row justify-between items-center mb-8">
+                <h1 class="text-white text-3xl font-semibold mb-4 sm:mb-0">Tâche à Faire</h1>
+                <div class="flex flex-col sm:flex-row items-center w-full sm:w-auto">
+                    <input
+                        type="text"
+                        id="newTaskInput"
+                        placeholder="Entrez une nouvelle tâche..."
+                        class="p-3 rounded-lg bg-[#28284f] text-white border border-[#3b3b6b] focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 sm:mb-0 sm:mr-3 w-full"
+                    />
+                    <button
+                        id="addTaskButton"
+                        class="new-task-button bg-[#00b300] text-white py-3 px-6 rounded-full text-base font-semibold flex items-center justify-center transition-colors duration-300 hover:bg-[#009900] w-full sm:w-auto"
+                    >
+                        <i class="fas fa-plus-circle mr-2 text-xl"></i>
+                        <span>Nouvelle tâche</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="task-sections flex-grow flex flex-col md:flex-row gap-5 overflow-x-auto pb-4">
+                <div class="task-card bg-[#28284f] rounded-lg p-5 shadow-md min-w-[280px] flex-shrink-0 flex flex-col">
+                    <h3 class="text-white text-xl font-semibold mb-4">Nouveau</h3>
+                    <div id="newTasksList" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+                        </div>
+                </div>
+
+                <div class="task-card bg-[#28284f] rounded-lg p-5 shadow-md min-w-[280px] flex-shrink-0">
+                    <h3 class="text-white text-xl font-semibold mb-4">Présélectionné</h3>
+                    </div>
+
+                <div class="task-card bg-[#28284f] rounded-lg p-5 shadow-md min-w-[280px] flex-shrink-0">
+                    <h3 class="text-white text-xl font-semibold mb-4">Présélectionné</h3>
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

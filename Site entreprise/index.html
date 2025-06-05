@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Emplois - Entreprises</title>
+    <style>
+        /* Styles généraux */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #282c36; /* Couleur de fond foncée */
+            color: #ffffff; /* Texte blanc */
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Empêche le défilement global */
+        }
+
+        /* Barre latérale (Sidebar) */
+        .sidebar {
+            width: 250px;
+            background-color: #363a45; /* Couleur plus foncée pour la sidebar */
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h1 {
+            color: #ffffff;
+            font-size: 1.8em;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 15px;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: #4a5160; /* Couleur au survol et actif */
+        }
+
+        .sidebar-menu .completed-tasks {
+            margin-top: 30px;
+            border-top: 1px solid #4a5160;
+            padding-top: 20px;
+        }
+
+        .sidebar-menu .completed-tasks a {
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-menu .completed-tasks a svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor; /* Pour que l'icône prenne la couleur du texte */
+        }
+
+
+        /* Contenu principal (Main Content) */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .new-task-button {
+            background-color: #6a8cd2; /* Couleur bleue pour le bouton */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .new-task-button:hover {
+            background-color: #5271b3;
+        }
+
+        .new-task-button svg {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Conteneur des colonnes (Kanban Board) */
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1; /* Permet aux colonnes de prendre l'espace restant */
+        }
+
+        .column {
+            flex: 1;
+            background-color: #363a45; /* Couleur de fond des colonnes */
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 250px; /* Largeur minimale pour les colonnes */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .task-list {
+            flex-grow: 1;
+            overflow-y: auto; /* Permet le défilement si trop de tâches */
+            padding-right: 5px; /* Pour l'esthétique de la scrollbar */
+        }
+
+        /* Style de la scrollbar pour les listes de tâches */
+        .task-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .task-list::-webkit-scrollbar-track {
+            background: #363a45;
+            border-radius: 10px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb {
+            background: #4a5160;
+            border-radius: 10px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb:hover {
+            background: #5a6170;
+        }
+
+        .task-card {
+            background-color: #4a5160; /* Couleur des cartes de tâche */
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: grab; /* Curseur pour indiquer que c'est déplaçable */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5; /* Rend la carte transparente pendant le glisser-déposer */
+            transform: scale(0.95);
+        }
+
+        /* Styles spécifiques pour le contenu de la carte */
+        .task-card .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .task-card .task-title {
+            margin: 0;
+            font-size: 1em;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .task-card .description-toggle {
+            cursor: pointer;
+            padding: 5px; /* Zone de clic plus grande */
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+        .task-card .description-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .task-card .description-toggle svg {
+            width: 18px;
+            height: 18px;
+            fill: #cccccc; /* Couleur de la flèche */
+            transition: transform 0.3s ease;
+        }
+
+        .task-card .description-toggle.expanded svg {
+            transform: rotate(180deg); /* Flèche vers le haut */
+        }
+
+        .task-card .task-description-content {
+            max-height: 0; /* Caché par défaut */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+            margin-top: 0; /* Pour éviter l'espace si la description est vide */
+        }
+
+        .task-card .task-description-content.show {
+            max-height: 100px; /* Hauteur maximale pour l'affichage, ajustez si besoin */
+            opacity: 1;
+            margin-top: 10px; /* Espacement une fois affiché */
+        }
+        .task-card .task-description-content p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .task-card .task-due-date {
+            font-size: 0.8em;
+            color: #909090;
+            margin-top: 5px;
+            display: flex;
+            align-items: center; /* Aligner le texte et l'icône */
+            gap: 5px; /* Espacement entre le texte et l'icône */
+        }
+
+        /* Style pour les dates critiques (passées ou aujourd'hui) */
+        .task-card .task-due-date.critical {
+            color: #e74c3c; /* Rouge vif pour l'alerte */
+            font-weight: bold;
+        }
+        .task-card .task-due-date.critical svg {
+            fill: #e74c3c; /* Couleur rouge pour l'icône */
+        }
+
+
+        /* Styles du modal "Ajouter une tâche" */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Assure que le modal est au-dessus du reste */
+            visibility: hidden; /* Caché par défaut */
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #363a45; /* Fond du modal, comme les colonnes */
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Espace entre les éléments du formulaire */
+        }
+
+        .modal-content h3 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 1.8em;
+            color: #ffffff;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #cccccc; /* Texte de label un peu plus clair */
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select {
+            background-color: #282c36; /* Fond des champs de saisie */
+            border: 1px solid #4a5160; /* Bordure des champs */
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1em;
+            width: calc(100% - 24px); /* Ajuste la largeur avec le padding */
+            box-sizing: border-box; /* Inclut padding et bordure dans la largeur */
+        }
+
+        .form-group textarea {
+            resize: vertical; /* Permet de redimensionner verticalement */
+            min-height: 80px;
+        }
+
+        .form-group input[type="date"] {
+            /* Styles pour l'icône calendrier par défaut du navigateur */
+            position: relative;
+            padding-right: 35px; /* Espace pour l'icône si besoin */
+        }
+
+        /* Cache l'icône par défaut et utilise une icône SVG si besoin */
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23cccccc"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>') center no-repeat;
+            background-size: 18px 18px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 1;
+            -webkit-appearance: none;
+        }
+        /* Pour Firefox */
+        .form-group input[type="date"]::-moz-calendar-picker-indicator {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23cccccc"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>') center no-repeat;
+            background-size: 18px 18px;
+            cursor: pointer;
+            opacity: 1;
+        }
+
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end; /* Aligner les boutons à droite */
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-buttons .cancel-button {
+            background-color: #4a5160; /* Couleur grise pour Annuler */
+            color: #ffffff;
+            border: none;
+        }
+
+        .modal-buttons .cancel-button:hover {
+            background-color: #5a6170;
+        }
+
+        .modal-buttons .add-button {
+            background-color: #6a8cd2; /* Couleur bleue pour Ajouter */
+            color: #ffffff;
+            border: none;
+        }
+
+        .modal-buttons .add-button:hover {
+            background-color: #5271b3;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1>Emplois</h1>
+        <nav class="sidebar-menu">
+            <ul>
+                <li><a href="#" class="active">Tâche à faire</a></li>
+                <li><a href="#">Développeur Java Senior</a></li>
+                <li><a href="#">Graphiste</a></li>
+                <li><a href="#">Gestionnaire de compte</a></li>
+            </ul>
+            <ul class="completed-tasks">
+                <li>
+                    <a href="#">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Tâches Terminées
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <h2>Tâche à Faire</h2>
+            <button class="new-task-button" onclick="showAddTaskModal()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                </svg>
+                Nouvelle tâche
+            </button>
+        </header>
+
+        <section class="kanban-board">
+            <div class="column" id="column-nouveau">
+                <div class="column-header">Nouveau</div>
+                <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="task-card" draggable="true" ondragstart="drag(event)" id="task_static_1">
+                        <div class="task-header">
+                            <p class="task-title">Préparer le brief pour le nouveau client X</p>
+                            <span class="description-toggle" onclick="toggleDescription(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="task-description-content">
+                            <p>Détails importants pour le brief client.</p>
+                        </div>
+                        <p class="task-due-date">Date limite: 01/06/2025</p>
+                    </div>
+                    <div class="task-card" draggable="true" ondragstart="drag(event)" id="task_static_2">
+                        <div class="task-header">
+                            <p class="task-title">Revoir les candidatures pour le poste de Dev. Front-End</p>
+                            <span class="description-toggle" onclick="toggleDescription(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="task-description-content">
+                            <p>Trier les CV et préparer les entretiens techniques.</p>
+                        </div>
+                        <p class="task-due-date">Date limite: 15/06/2025</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column" id="column-preselectionne">
+                <div class="column-header">Présélectionné</div>
+                <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="task-card" draggable="true" ondragstart="drag(event)" id="task_static_3">
+                        <div class="task-header">
+                            <p class="task-title">Planifier entretien avec M. Dupont (Dev. Java)</p>
+                            <span class="description-toggle" onclick="toggleDescription(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="task-description-content">
+                            <p>L'entretien est prévu pour la semaine prochaine.</p>
+                        </div>
+                        <p class="task-due-date">Date limite: 20/06/2025</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column" id="column-final">
+                <div class="column-header">Finalisé</div>
+                <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="addTaskModal">
+        <div class="modal-content">
+            <h3>Ajouter une tâche</h3>
+            <div class="form-group">
+                <label for="taskTitle">Titre :</label>
+                <input type="text" id="taskTitle" placeholder="Entrez le titre de la tâche">
+            </div>
+            <div class="form-group">
+                <label for="taskDescription">Description :</label>
+                <textarea id="taskDescription" placeholder="Entrez une description (optionnel)"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="taskDueDate">Date limite :</label>
+                <input type="date" id="taskDueDate">
+            </div>
+            <div class="form-group">
+                <label for="taskColumn">Choisir la colonne :</label>
+                <select id="taskColumn">
+                    <option value="column-nouveau">Nouveau</option>
+                    <option value="column-preselectionne">Présélectionné</option>
+                    <option value="column-final">Finalisé</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-button" onclick="hideAddTaskModal()">Annuler</button>
+                <button class="add-button" onclick="createTask()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Références aux éléments du DOM
+        const addTaskModal = document.getElementById('addTaskModal');
+        const taskTitleInput = document.getElementById('taskTitle');
+        const taskDescriptionInput = document.getElementById('taskDescription');
+        const taskDueDateInput = document.getElementById('taskDueDate');
+        const taskColumnSelect = document.getElementById('taskColumn');
+
+        // SVG pour le logo d'attention (triangle avec point d'exclamation)
+        const warningSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18" fill="#e74c3c">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+        `;
+
+        // --- Fonctions pour le Modal "Ajouter une tâche" ---
+
+        // Fonction pour afficher le modal "Ajouter une tâche"
+        function showAddTaskModal() {
+            // Calcul des dates min et max pour l'input de date
+            const today = new Date();
+            const oneYearLater = new Date();
+            oneYearLater.setFullYear(today.getFullYear() + 1);
+
+            // Format YYYY-MM-DD pour l'attribut 'min' et 'max'
+            const todayFormatted = today.toISOString().split('T')[0];
+            const oneYearLaterFormatted = oneYearLater.toISOString().split('T')[0];
+
+            taskDueDateInput.setAttribute('min', todayFormatted);
+            taskDueDateInput.setAttribute('max', oneYearLaterFormatted);
+
+            addTaskModal.classList.add('show');
+            // Réinitialiser les champs quand le modal s'ouvre
+            taskTitleInput.value = '';
+            taskDescriptionInput.value = '';
+            taskDueDateInput.value = '';
+            taskColumnSelect.value = 'column-nouveau'; // Colonne par défaut
+        }
+
+        // Fonction pour cacher le modal "Ajouter une tâche"
+        function hideAddTaskModal() {
+            addTaskModal.classList.remove('show');
+        }
+
+        // Fonction pour créer et ajouter une nouvelle tâche depuis le modal
+        function createTask() {
+            const title = taskTitleInput.value.trim();
+            const description = taskDescriptionInput.value.trim();
+            const dueDate = taskDueDateInput.value; // Format YYYY-MM-DD
+            const columnId = taskColumnSelect.value;
+
+            if (!title) {
+                alert("Le titre de la tâche ne peut pas être vide !");
+                return;
+            }
+
+            // Vérification de la date limite
+            let isCriticalDate = false; // Indicateur pour savoir si la date est critique
+
+            if (dueDate) {
+                const selectedDate = new Date(dueDate);
+                const today = new Date();
+                // Supprime l'heure pour comparer seulement la date
+                today.setHours(0, 0, 0, 0);
+                selectedDate.setHours(0, 0, 0, 0); // Assurez-vous que la date sélectionnée n'a pas d'heure non plus
+
+                if (selectedDate < today) {
+                    alert("La date limite ne peut pas être une date passée !");
+                    return;
+                }
+
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(today.getFullYear() + 1);
+                oneYearLater.setHours(0, 0, 0, 0); // Comparer la date sans l'heure
+
+                if (selectedDate > oneYearLater) {
+                    alert("La date limite ne peut pas dépasser un an à partir d'aujourd'hui !");
+                    return;
+                }
+
+                // Vérifier si la date est aujourd'hui ou dans le passé (après la validation ci-dessus, seul "aujourd'hui" reste)
+                if (selectedDate.getTime() === today.getTime()) {
+                    isCriticalDate = true;
+                }
+            }
+
+
+            const newTask = document.createElement('div');
+            const taskId = 'task' + Date.now(); // ID unique pour la tâche
+            newTask.className = 'task-card';
+            newTask.setAttribute('draggable', 'true');
+            newTask.setAttribute('ondragstart', 'drag(event)');
+            newTask.id = taskId;
+
+            let taskContent = `
+                <div class="task-header">
+                    <p class="task-title">${title}</p>
+                    ${description ? `
+                        <span class="description-toggle" onclick="toggleDescription(this)">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M7 10l5 5 5-5z"/>
+                            </svg>
+                        </span>
+                    ` : ''}
+                </div>
+            `;
+
+            if (description) {
+                taskContent += `
+                    <div class="task-description-content">
+                        <p>${description}</p>
+                    </div>
+                `;
+            }
+
+            if (dueDate) {
+                // Formater la date pour l'affichage (ex: JJ/MM/AAAA)
+                const dateObj = new Date(dueDate);
+                const formattedDate = dateObj.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                taskContent += `<p class="task-due-date${isCriticalDate ? ' critical' : ''}">
+                                    ${isCriticalDate ? warningSvg : ''}Date limite: ${formattedDate}
+                                </p>`;
+            }
+            newTask.innerHTML = taskContent;
+
+            // Ajouter la tâche à la colonne sélectionnée
+            const targetColumnList = document.getElementById(columnId).querySelector('.task-list');
+            if (targetColumnList) {
+                targetColumnList.appendChild(newTask);
+            } else {
+                console.error("Colonne cible introuvable:", columnId);
+            }
+
+            hideAddTaskModal(); // Cacher le modal après l'ajout
+        }
+
+        // --- Fonctions pour le glisser-déposer (Drag and Drop) - Inchangées ---
+        function allowDrop(ev) {
+            ev.preventDefault(); // Permet le dépôt
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id); // Stocke l'ID de la carte glissée
+            ev.target.classList.add('dragging'); // Ajoute une classe pour le style pendant le glisser
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+
+            let dropTarget = ev.target;
+            while (dropTarget && !dropTarget.classList.contains('task-list')) {
+                if (dropTarget.classList.contains('task-card')) {
+                    dropTarget = dropTarget.closest('.task-list');
+                    break;
+                }
+                dropTarget = dropTarget.parentNode;
+            }
+
+            if (dropTarget && dropTarget.classList.contains('task-list')) {
+                dropTarget.appendChild(draggedElement);
+            }
+        }
+
+        // --- Fonction pour afficher/cacher la description ---
+        function toggleDescription(toggleElement) {
+            const taskCard = toggleElement.closest('.task-card');
+            const descriptionContent = taskCard.querySelector('.task-description-content');
+
+            if (descriptionContent) {
+                descriptionContent.classList.toggle('show');
+                toggleElement.classList.toggle('expanded'); // Pour faire tourner la flèche
+            }
+        }
+
+        // --- Gérer la classe 'active' pour le menu de la sidebar - Inchangée ---
+        document.querySelectorAll('.sidebar-menu a').forEach(item => {
+            item.addEventListener('click', function(event) {
+                document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // Fermer le modal si on clique en dehors (sur l'overlay)
+        addTaskModal.addEventListener('click', function(event) {
+            if (event.target === addTaskModal) {
+                hideAddTaskModal();
+            }
+        });
+
+        // --- Fonction pour vérifier et styliser les dates des tâches existantes au chargement ---
+        function checkExistingTaskDates() {
+            document.querySelectorAll('.task-card').forEach(taskCard => {
+                const dueDateElement = taskCard.querySelector('.task-due-date');
+                if (dueDateElement) {
+                    const dateText = dueDateElement.textContent.replace('Date limite: ', '').trim();
+                    // Convertir la date du format JJ/MM/AAAA en MM/JJ/AAAA pour Date()
+                    const parts = dateText.split('/');
+                    if (parts.length === 3) {
+                        const formattedDateForParsing = `${parts[1]}/${parts[0]}/${parts[2]}`;
+                        const taskDueDate = new Date(formattedDateForParsing);
+
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0); // Réinitialiser l'heure pour la comparaison
+
+                        taskDueDate.setHours(0, 0, 0, 0); // Réinitialiser l'heure pour la tâche aussi
+
+                        if (taskDueDate.getTime() <= today.getTime()) {
+                            dueDateElement.classList.add('critical');
+                            // Insérer le SVG au début du contenu de l'élément p
+                            dueDateElement.insertAdjacentHTML('afterbegin', warningSvg);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Appeler la fonction au chargement de la page
+        document.addEventListener('DOMContentLoaded', checkExistingTaskDates);
+
+    </script>
+</body>
+</html>
