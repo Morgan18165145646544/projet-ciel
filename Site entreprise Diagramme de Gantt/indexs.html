@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramme de Gantt interactif</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Diagramme de Gantt</h1>
+
+        <!-- Formulaire pour choisir le mois et l'année -->
+        <div class="month-selector">
+            <label for="month">Mois :</label>
+            <select id="month">
+                <option value="0">Janvier</option>
+                <option value="1">Février</option>
+                <option value="2">Mars</option>
+                <option value="3">Avril</option>
+                <option value="4">Mai</option>
+                <option value="5">Juin</option>
+                <option value="6">Juillet</option>
+                <option value="7">Août</option>
+                <option value="8">Septembre</option>
+                <option value="9">Octobre</option>
+                <option value="10">Novembre</option>
+                <option value="11">Décembre</option>
+            </select>
+
+            <label for="year">Année :</label>
+            <input type="number" id="year" value="2025">
+
+            <button id="update-month">Mettre à jour le mois</button>
+        </div>
+
+        <!-- Formulaire pour ajouter une tâche -->
+        <div class="task-form">
+            <h2>Ajouter une tâche</h2>
+            <label for="task-name">Nom de la tâche:</label>
+            <input type="text" id="task-name" placeholder="Nom de la tâche">
+
+            <label for="task-start">Date de début:</label>
+            <input type="date" id="task-start">
+
+            <label for="task-end">Date de fin:</label>
+            <input type="date" id="task-end">
+
+            <label for="task-color">Couleur:</label>
+            <input type="color" id="task-color">
+
+            <button id="add-task">Ajouter la tâche</button>
+        </div>
+
+        <!-- Conteneur du diagramme de Gantt -->
+        <div class="gantt-container">
+            <div class="gantt-header" id="gantt-header">
+                <!-- L'en-tête des jours sera généré dynamiquement via JavaScript -->
+            </div>
+            <div class="gantt-tasks" id="gantt-tasks">
+                <!-- Les tâches ajoutées seront ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour la modification de la tâche -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Modifier la tâche</h2>
+            <label for="edit-name">Nom de la tâche:</label>
+            <input type="text" id="edit-name" placeholder="Nom de la tâche">
+            
+            <label for="edit-start">Date de début:</label>
+            <input type="date" id="edit-start">
+            
+            <label for="edit-end">Date de fin:</label>
+            <input type="date" id="edit-end">
+            
+            <label for="edit-color">Couleur:</label>
+            <input type="color" id="edit-color">
+            
+            <div class="modal-buttons">
+                <button id="save-task">Sauvegarder</button>
+                <button id="delete-task" class="delete">Supprimer</button>
+                <button id="close-modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
